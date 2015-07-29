@@ -2,7 +2,7 @@
     "name": "gitbook-plugin-tree",
     "description": "Gitbook 侧边栏扩展插件",
     "main": "index.js",
-    "version": "0.0.34",
+    "version": "0.3.11",
     "engines": {
         "gitbook": "*"
     },

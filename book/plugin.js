@@ -2,36 +2,54 @@ require(["gitbook"], function(gitbook) {
 
     var config = null;
 
-    var stateBuffer = null;
+    var itemStates = {};
     var saveState = function($, config, isFirst) {
-        var box = $('.summary');
-        stateBuffer = box.html();
+        var items = $('.summary li');
+        items.each(function(i, item) {
+            var $item = $(this);
+            var level = $item.attr('data-level');
+            itemStates[level] = $item.hasClass('open') ? "open" : "close";
+        });
     };
 
     var recoveryState = function($, config, isFirst) {
-        if (!stateBuffer) return;
-        var box = $('.summary');
-        box.html(stateBuffer);
+        var items = $('.summary li');
+        items.each(function(i, item) {
+            var $item = $(this);
+            var level = $item.attr('data-level');
+            $item.addClass(itemStates[level]);
+        });
     };
 
     var bindEvent = function($, config, isFirst) {
         var items = $('.summary li');
+        items.removeClass('active');
         items.each(function(i, item) {
             var $item = $(item);
+            //高亮当前项
+            var path = ($item.attr('data-path') || '').toLowerCase();
+            if (location.href.toString().toLowerCase().indexOf(path) > -1) {
+                $item.addClass('active');
+            }
+            //
             item.childList = $item.children('ul');
             item.hasChildList = item.childList.length > 0;
-            if (isFirst) {
-                $item.addClass(item.hasChildList ? "close" : "no-child");
+            //
+            var level = $item.attr('data-level');
+            $item.addClass(item.hasChildList ? (itemStates[level] || 'close') : "no-child");
+            if (!item.treeBtnAdded) {
                 item.sn = $item.children('span,a');
                 item.sn.html('<span class="tree-btn"><span class="t1">+</span><span class="t2">-</span></span>' + item.sn.html());
+                item.treeBtnAdded = true;
             }
+            //
             if (!item.hasChildList) return;
             item.btn = $item.find('.tree-btn');
             item.btn.off('click').on('click', function(event) {
                 var item = this.parentNode.parentNode,
                     $item = $(item);
                 if ($item.hasClass('close')) {
-                    $item.removeClass("close").addClass('open');
+                    $item.addClass('open').removeClass("close");
                 } else {
                     $item.addClass("close").removeClass('open');
                 }
